@@ -10,7 +10,7 @@ cache:
 
 before_script:
   - apt update
-  - apt install -y libwxgtk3.0-dev libtinfo-dev libwxgtk-media3.0-dev libwxgtk-webview3.0-dev
+  - apt install -y libwxgtk3.0-dev libtinfo-dev libwxgtk-media3.0-dev libwxgtk-webview3.0-dev make xz-utils
   - stack setup
 
 build:
