@@ -1,2 +1,2 @@
 * Mental Math
-A repository for me to practice FRP and mental math
+A repository for me to practice FRP and mental math.
