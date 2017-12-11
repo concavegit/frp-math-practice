@@ -10,7 +10,7 @@ cache:
 
 before_script:
   - apt update
-  - apt install -y xz-utils make
+  - apt install -y xz-utils make libwxgtk3.0-dev
   - stack setup
 
 build:
