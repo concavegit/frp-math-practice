@@ -9,7 +9,7 @@ import           System.Random
 data Mult = Mult { multA   :: Int
                  , multB   :: Int
                  , multAns :: Int
-                 } deriving Show
+                 }
 
 rand :: (RandomGen g, Random a) => (a, a) -> State g a
 rand = state . randomR
