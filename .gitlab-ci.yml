@@ -10,6 +10,7 @@ cache:
 
 before_script:
   - apt update
+  - apt install -y xz-utils make
   - stack setup
 
 build:
