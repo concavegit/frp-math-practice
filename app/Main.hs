@@ -29,13 +29,11 @@ main = start $ do
          , widget bnext
          ]]
   let networkDescription = do
-
         bInput <- behaviorText input ""
         eBnext <- event0 bnext command
-        bMultIdx <- accumB 0 ((+1) <$ eBnext)
+        bG <- accumB g0 (execState (randMult (0, 99)) <$ eBnext)
 
-        let mults = evalState (sequence $ repeat (randMult (0, 99))) g0
-            mult = (mults !!) <$> bMultIdx
+        let mult = evalState (randMult (0, 99)) <$> bG
             bPrompt1 = show . multA <$> mult
             bPrompt2 = show . multB <$> mult
             result = fmap <$> (flip ($) . multAns <$> mult) <*> (fmap (==) . readMaybe <$> bInput)
