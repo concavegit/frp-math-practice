@@ -28,6 +28,7 @@ main = start $ do
          , widget output
          , widget bnext
          ]]
+
   let networkDescription = do
         bInput <- behaviorText input ""
         eBnext <- event0 bnext command
