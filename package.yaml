@@ -1,10 +1,12 @@
 name:                mental-math
 version:             0.1.0.0
-github:              concavegit/mental-math
+git:                 https://gitlab.com/concavegit/mental-math
 license:             MIT
 author:              Kawin Nikomborirak
 maintainer:          concavegit@gmail.com
 copyright:           2017 Kawin Nikomborirak
+homepage:            https://gitlab.com/concavegit/mental-math#readme
+bug-reports:         https://gitlab.com/concavegit/mental-math/issues
 
 extra-source-files:
 - README.org
