@@ -2,7 +2,6 @@ module Main where
 
 import           Control.Monad.State
 import           Core
-import           Data.Maybe
 import           Graphics.UI.WX      hiding (Event)
 import           Reactive.Banana
 import           Reactive.Banana.WX
