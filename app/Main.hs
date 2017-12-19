@@ -36,7 +36,10 @@ main = start $ do
             bPrompt2 = show . multB <$> mult
             result = fmap <$> (flip ($) . multAns <$> mult) <*> (fmap (==) . readMaybe <$> bInput)
             showNumber = maybe "--" show
+            resultText = result <@ eNext
+
+        steppedResult <- stepper "--" (showNumber <$> resultText)
         sink prompt1 [ text :== bPrompt1 ]
         sink prompt2 [ text :== bPrompt2 ]
-        sink output [ text :== showNumber <$> result]
+        sink output [ text :== steppedResult]
   compile networkDescription >>= actuate
