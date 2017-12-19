@@ -13,9 +13,8 @@ main = start $ do
   f <- frame [text := "Mental Math"]
   prompt1 <- staticText f []
   prompt2 <- staticText f []
-  input <- entry f []
+  input <- entry f [processEnter := True]
   output <- staticText f []
-  bnext <- button f [text := "Next"]
   g0 <- getStdGen
 
   set f [layout := margin 10 $ row 10
@@ -25,13 +24,12 @@ main = start $ do
          , label "="
          , widget input
          , widget output
-         , widget bnext
          ]]
 
   let networkDescription = do
         bInput <- behaviorText input ""
-        eBnext <- event0 bnext command
-        bG <- accumB g0 (execState (randMult (0, 99)) <$ eBnext)
+        eNext <- event0 input command
+        bG <- accumB g0 (execState (randMult (0, 99)) <$ eNext)
 
         let mult = evalState (randMult (0, 99)) <$> bG
             bPrompt1 = show . multA <$> mult
