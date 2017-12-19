@@ -31,15 +31,15 @@ main = start $ do
         eNext <- event0 input command
         bG <- accumB g0 (execState (randMult (0, 99)) <$ eNext)
 
-        let mult = evalState (randMult (0, 99)) <$> bG
-            bPrompt1 = show . multA <$> mult
-            bPrompt2 = show . multB <$> mult
-            result = fmap <$> (flip ($) . multAns <$> mult) <*> (fmap (==) . readMaybe <$> bInput)
+        let bMult = evalState (randMult (0, 99)) <$> bG
+            bPrompt1 = show . multA <$> bMult
+            bPrompt2 = show . multB <$> bMult
+            bResult = fmap <$> (flip ($) . multAns <$> bMult) <*> (fmap (==) . readMaybe <$> bInput)
             showNumber = maybe "--" show
-            resultText = result <@ eNext
+            eResultText = bResult <@ eNext
 
-        steppedResult <- stepper "--" (showNumber <$> resultText)
+        eSteppedResult <- stepper "--" (showNumber <$> eResultText)
         sink prompt1 [ text :== bPrompt1 ]
         sink prompt2 [ text :== bPrompt2 ]
-        sink output [ text :== steppedResult]
+        sink output [ text :== eSteppedResult]
   compile networkDescription >>= actuate
