@@ -29,6 +29,8 @@ main = start $ do
   let networkDescription = do
         bInput <- behaviorText input ""
         eNext <- event0 input command
+        eClear <- event0 input command
+        bClear <- stepper "" ("" <$ eClear)
         bG <- accumB g0 (execState (randMult (0, 99)) <$ eNext)
 
         let bMult = evalState (randMult (0, 99)) <$> bG
@@ -42,4 +44,5 @@ main = start $ do
         sink prompt1 [ text :== bPrompt1 ]
         sink prompt2 [ text :== bPrompt2 ]
         sink output [ text :== eSteppedResult]
+        sink input [text :== bClear]
   compile networkDescription >>= actuate
