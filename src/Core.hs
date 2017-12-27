@@ -32,6 +32,6 @@ randMult :: RandomGen g => (Int, Int) -> State g Mult
 randMult ns = (\a b -> Mult a b (a * b)) <$> rand ns <*> rand ns
 
 randTrig :: RandomGen g => State g Trig
-randTrig = (\a -> Trig a <$> toEnum <*> round . (* 1000) . ($ fromIntegral a)
-             . ([cos, sin, tan] !!))
+randTrig = (\a -> Trig a <$> toEnum <*> (round :: Integral a => Double -> a)
+             . (* 1000) . ($ fromIntegral a) . ([cos, sin, tan] !!))
   <$> rand (0, 90) <*> rand (0, 2)
