@@ -1,4 +1,9 @@
-module Widget.Mult where
+module Widget.Mult
+  ( MultWidget(..)
+  , multNetwork
+  , newMultWidget
+  , setupMultWidget
+  ) where
 
 import           Control.Monad.State
 import           Core
@@ -16,27 +21,50 @@ data MultWidget = MultWidget
   , multG0     :: StdGen
   }
 
-widgetProps :: MultWidget -> IO ()
-widgetProps w = set (multPane w) [layout := margin 10 $ row 10
+-- |Creates a new multiplication widget
+newMultWidget :: Frame () -> IO MultWidget
+newMultWidget = (>>= (\pane prompt input output -> MultWidget pane
+                       <$> prompt
+                       <*> input
+                       <*> output
+                       <*> getStdGen)
+                 <$> id
+                 <*> flip staticText []
+                 <*> flip entry []
+                 <*> flip staticText [])
+  . flip panel []
+
+-- |Sets the layout of the multiplication widget as well as properties
+-- and focus.
+setupMultWidget :: MultWidget -> IO ()
+setupMultWidget w = do
+  set (multPane w) [layout := margin 10 $ row 10
                                       [ widget (multPrompt w)
                                       , label "="
                                       , widget (multInput w)
                                       , widget (multOutput w)]]
-  >> set (multInput w) [processEnter := True]
+  set (multInput w) [processEnter := True]
+  focusOn (multInput w)
 
+-- |Sets up the reactive behaviors for the widget
 multNetwork :: MultWidget -> MomentIO ()
 multNetwork w = do
   bInput <- behaviorText (multInput w) ""
   eNext <- event0 (multInput w) command
   bClear <- stepper  "" ("" <$ eNext)
+
   let multProb = randMult (0, 99)
+
   bG <- accumB (multG0 w) (execState multProb <$ eNext)
-  let bMult = evalState (randMult (0, 99)) <$> bG
+
+  let bMult = evalState multProb <$> bG
       bPrompt = (\a b -> show a ++ " x " ++ show b)
         <$> (multA <$> bMult) <*> (multB <$> bMult)
       bResult = fmap <$> (flip (==) . multAns <$> bMult)
         <*> (readMaybe <$> bInput)
+
   bSteppedResult <- stepper "--" (maybe "--" show <$> (bResult <@ eNext))
+
   sink (multPrompt w) [text :== bPrompt]
   sink (multOutput w) [text :==  bSteppedResult]
   sink (multInput w) [text :== bClear]
