@@ -29,8 +29,7 @@ main = start $ do
   let networkDescription = do
         bInput <- behaviorText input ""
         eNext <- event0 input command
-        eClear <- event0 input command
-        bClear <- stepper "" ("" <$ eClear)
+        bClear <- stepper "" ("" <$ eNext)
         bG <- accumB g0 (execState (randMult (0, 99)) <$ eNext)
 
         let bMult = evalState (randMult (0, 99)) <$> bG
