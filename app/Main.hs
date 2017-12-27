@@ -11,22 +11,19 @@ import           Text.Read           (readMaybe)
 main :: IO ()
 main = start $ do
   f <- frame [text := "Mental Math"]
-  prompt1 <- staticText f [fontSize := 32]
-  prompt2 <- staticText f [fontSize := 32]
-  multSymb <- staticText f [fontSize := 32, text := "x"]
+  prompt1 <- staticText f []
+  prompt2 <- staticText f []
   input <- entry f [processEnter := True]
-  output <- staticText f [fontSize := 32]
-  score <- staticText f []
+  output <- staticText f []
   g0 <- getStdGen
 
-  set f [layout := margin 10 $ row 30
+  set f [layout := margin 10 $ row 10
          [ widget prompt1
-         , widget multSymb
+         , label "x"
          , widget prompt2
          , label "="
-         , minsize (sz 400 100) $ widget input
+         , widget input
          , widget output
-         , widget score
          ]]
 
   let networkDescription = do
@@ -34,15 +31,9 @@ main = start $ do
         eNext <- event0 input command
         eClear <- event0 input command
         bClear <- stepper "" ("" <$ eClear)
-        upperLim <- accumB (20 :: Int) ((round . (* 1.5) . fromIntegral) <$ eNext)
-        -- _ <- fmap ((fmap (flip ($)) upperLim) <*>) (ra)
-        let bNewMult = curry (randMult :: (Int, Int) -> State StdGen Mult) 1 <$> upperLim
-            eNewMult = bNewMult <@ eNext
+        bG <- accumB g0 (execState (randMult (0, 99)) <$ eNext)
 
-        -- bFG <- accumB g0 (execState (randMult (1, 150)) <$ eNext)
-        bG <- accumB g0 (execState <$> eNewMult)
-
-        let bMult = evalState <$> bNewMult <*> bG
+        let bMult = evalState (randMult (0, 99)) <$> bG
             bPrompt1 = show . multA <$> bMult
             bPrompt2 = show . multB <$> bMult
             bResult = fmap <$> (flip ($) . multAns <$> bMult) <*> (fmap (==) . readMaybe <$> bInput)
