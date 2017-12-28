@@ -19,7 +19,6 @@ data MultWidget = MultWidget
   { multPane   :: Panel ()
   , multPrompt :: StaticText ()
   , multInput  :: TextCtrl ()
-  , multOutput :: StaticText ()
   , multPoints :: StaticText ()
   , multTimer  :: StaticText ()
   , multTicker :: Timer
@@ -28,10 +27,9 @@ data MultWidget = MultWidget
 
 -- |Creates a new multiplication widget
 newMultWidget :: Frame () -> IO MultWidget
-newMultWidget = (>>= (\pane prompt input output points wTimer ticker -> MultWidget pane
+newMultWidget = (>>= (\pane prompt input points wTimer ticker -> MultWidget pane
                        <$> prompt
                        <*> input
-                       <*> output
                        <*> points
                        <*> wTimer
                        <*> ticker
@@ -39,7 +37,6 @@ newMultWidget = (>>= (\pane prompt input output points wTimer ticker -> MultWidg
                  <$> id
                  <*> flip staticText []
                  <*> flip entry []
-                 <*> flip staticText []
                  <*> flip staticText []
                  <*> flip staticText []
                  <*> flip timer [])
@@ -55,8 +52,7 @@ setupMultWidget w = do
                       , widget (multInput w)
                       , widget (multPoints w)
                       ]
-                    , [ widget (multOutput w)
-                      , widget (multTimer w)
+                    , [ widget (multTimer w)
                       ]
                     ]]
 
@@ -91,7 +87,6 @@ multNetwork w = do
 
   sink (multInput w) [text :== bClear]
   sink (multInput w) [enabled :== bInProgress]
-  sink (multOutput w) [text :==  bSteppedResult]
   sink (multPoints w) [text :== show <$> bScore]
   sink (multPrompt w) [text :== bPrompt]
   sink (multTimer w) [text :== show <$> bTimeLeft]
