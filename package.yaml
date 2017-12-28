@@ -23,7 +23,6 @@ dependencies:
 - random
 - reactive-banana
 - reactive-banana-wx
-- time
 - wx
 
 library:

@@ -9,7 +9,6 @@ module Widget.Mult
 
 import           Control.Monad.State
 import           Core
-import           Data.Time.Clock
 import           Graphics.UI.WX      hiding (Event)
 import           Reactive.Banana
 import           Reactive.Banana.WX
@@ -71,10 +70,11 @@ multNetwork w = do
   bInput <- behaviorText (multInput w) ""
   eNext <- event0 (multInput w) command
   bClear <- stepper "" ("" <$ eNext)
-  bTimeLeft <- bTimer 90
-  _ <- event0 (multTicker w) command
+  eTicker <- event0 (multTicker w) command
+  bTimeLeft <- accumB (90 :: Int) (subtract 1 <$ eTicker)
 
-  let multProb = randMult (0, 99)
+  let bInProgress = (> 0) <$> bTimeLeft
+      multProb = randMult (0, 99)
 
   bG <- accumB (multG0 w) (execState multProb <$ eNext)
 
@@ -90,13 +90,8 @@ multNetwork w = do
   bSteppedResult <- stepper "--" (maybe "--" show <$> (bResult <@ eNext))
 
   sink (multInput w) [text :== bClear]
+  sink (multInput w) [enabled :== bInProgress]
   sink (multOutput w) [text :==  bSteppedResult]
   sink (multPoints w) [text :== show <$> bScore]
   sink (multPrompt w) [text :== bPrompt]
   sink (multTimer w) [text :== show <$> bTimeLeft]
-
-bTimer :: Int -> MomentIO (Behavior Int)
-bTimer t = do
-  initialTime <- liftIO getCurrentTime
-  currentTime <- fromPoll getCurrentTime
-  pure $ flip subtract t . round . flip diffUTCTime initialTime <$> currentTime
