@@ -7,13 +7,13 @@ At the moment only multiplication is implemented.
 * Gameplay
 You have 90 seconds to answer as many 2-digit multiplication problems as possible.
 A correct answer is 1 point, and an incorrect answer is -1 points.
-To discourage shying away from unfavorable odds, one can only restart once the 90 seconds is up.
+To discourage shying away from unfavorable odds, you can only restart once the 90 seconds is up.
 
 * Installing
 1. If not done already, [[https://git-scm.com/downloads][install the git command line]].
 2. If not done already, [[https://docs.haskellstack.org/en/stable/install_and_upgrade/][install stack]].
 3. Open the git command line.
-4. Run `git clone https://gitlab.com/concavegit/mental-math.git`
-5. Run `cd mental-math`
-6. Run `stack install`
-7. To play, type `mental-math-exe`
+4. Run =git clone https://gitlab.com/concavegit/mental-math.git=
+5. Run =cd mental-math=
+6. Run =stack install=
+7. To play, type =mental-math-exe=
