@@ -28,7 +28,8 @@ data MultWidget = MultWidget
 
 -- |Creates a new multiplication widget
 newMultWidget :: Frame () -> IO MultWidget
-newMultWidget = (>>= (\pane prompt input points gauge ticker reset -> MultWidget pane
+newMultWidget = (>>= (\pane prompt input points gauge ticker reset
+                      -> MultWidget pane
                        <$> prompt
                        <*> input
                        <*> points
@@ -123,5 +124,7 @@ multNetwork w = do
   sink (multReset w) [enabled :== not <$> bInProgress]
 
 colorGrad :: Color -> Color -> Int -> Color
-colorGrad c0 ct i = rgb (pBetween (colorRed c0) (colorRed ct)) (pBetween (colorGreen c0) (colorGreen ct)) (pBetween (colorBlue c0) (colorBlue ct))
+colorGrad c0 ct i = rgb (pBetween (colorRed c0) (colorRed ct))
+  (pBetween (colorGreen c0) (colorGreen ct))
+  (pBetween (colorBlue c0) (colorBlue ct))
   where pBetween x y = x + round (fromIntegral ((y - x) * i) / 90 :: Double)
