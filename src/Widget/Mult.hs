@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Widget.Mult
   ( MultWidget(..)
   , multNetwork
@@ -7,6 +9,7 @@ module Widget.Mult
 
 import           Control.Monad.State
 import           Core
+import           Data.Time.Clock
 import           Graphics.UI.WX      hiding (Event)
 import           Reactive.Banana
 import           Reactive.Banana.WX
@@ -18,19 +21,22 @@ data MultWidget = MultWidget
   , multPrompt :: StaticText ()
   , multInput  :: TextCtrl ()
   , multOutput :: StaticText ()
+  , multPoints :: StaticText ()
   , multG0     :: StdGen
   }
 
 -- |Creates a new multiplication widget
 newMultWidget :: Frame () -> IO MultWidget
-newMultWidget = (>>= (\pane prompt input output -> MultWidget pane
+newMultWidget = (>>= (\pane prompt input output points -> MultWidget pane
                        <$> prompt
                        <*> input
                        <*> output
+                       <*> points
                        <*> getStdGen)
                  <$> id
                  <*> flip staticText []
                  <*> flip entry []
+                 <*> flip staticText []
                  <*> flip staticText [])
   . flip panel []
 
@@ -42,6 +48,7 @@ setupMultWidget w = do
                                       [ widget (multPrompt w)
                                       , label "="
                                       , widget (multInput w)
+                                      , widget (multPoints w)
                                       , widget (multOutput w)]]
   set (multInput w) [processEnter := True]
   focusOn (multInput w)
@@ -62,9 +69,19 @@ multNetwork w = do
         <$> (multA <$> bMult) <*> (multB <$> bMult)
       bResult = fmap <$> (flip (==) . multAns <$> bMult)
         <*> (readMaybe <$> bInput)
-
+      eScore = (\case Just True -> (+1)
+                      _         -> subtract 1)
+        <$> bResult <@ eNext
+  bScore <- accumB (0 :: Int) eScore
   bSteppedResult <- stepper "--" (maybe "--" show <$> (bResult <@ eNext))
 
   sink (multPrompt w) [text :== bPrompt]
   sink (multOutput w) [text :==  bSteppedResult]
+  sink (multPoints w) [text :== show <$> bScore]
   sink (multInput w) [text :== bClear]
+
+timer :: Int -> MomentIO (Behavior Int)
+timer t = do
+  initialTime <- liftIO getCurrentTime
+  currentTime <- fromPoll getCurrentTime
+  pure $ subtract t . round . flip diffUTCTime initialTime <$> currentTime
