@@ -99,7 +99,7 @@ multNetwork w = do
                      ]
   sink (multPoints w) [text :== show <$> bScore]
   sink (multPrompt w) [text :== bPrompt]
-  sink (multGauge w) [ bgcolor :== bColor
+  sink (multGauge w) [ color :== bColor
                      , selection :== bTimeLeft
                      ]
 
