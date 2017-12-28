@@ -1,8 +1,8 @@
 module Core
-  ( randMult
-  , randTrig
-  , Mult (..)
+  ( Mult (..)
+  , randMult
   , Trig (..)
+  , randTrig
   ) where
 
 import           Control.Arrow
