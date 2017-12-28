@@ -22,35 +22,47 @@ data MultWidget = MultWidget
   , multInput  :: TextCtrl ()
   , multOutput :: StaticText ()
   , multPoints :: StaticText ()
+  , multTimer  :: StaticText ()
+  , multTicker :: Timer
   , multG0     :: StdGen
   }
 
 -- |Creates a new multiplication widget
 newMultWidget :: Frame () -> IO MultWidget
-newMultWidget = (>>= (\pane prompt input output points -> MultWidget pane
+newMultWidget = (>>= (\pane prompt input output points wTimer ticker -> MultWidget pane
                        <$> prompt
                        <*> input
                        <*> output
                        <*> points
+                       <*> wTimer
+                       <*> ticker
                        <*> getStdGen)
                  <$> id
                  <*> flip staticText []
                  <*> flip entry []
                  <*> flip staticText []
-                 <*> flip staticText [])
+                 <*> flip staticText []
+                 <*> flip staticText []
+                 <*> flip timer [])
   . flip panel []
 
 -- |Sets the layout of the multiplication widget as well as properties
 -- and focus.
 setupMultWidget :: MultWidget -> IO ()
 setupMultWidget w = do
-  set (multPane w) [layout := margin 10 $ row 10
-                                      [ widget (multPrompt w)
-                                      , label "="
-                                      , widget (multInput w)
-                                      , widget (multPoints w)
-                                      , widget (multOutput w)]]
+  set (multPane w) [layout := margin 10 $ grid 10 10
+                    [ [ widget (multPrompt w)
+                      , label "="
+                      , widget (multInput w)
+                      , widget (multPoints w)
+                      ]
+                    , [ widget (multOutput w)
+                      , widget (multTimer w)
+                      ]
+                    ]]
+
   set (multInput w) [processEnter := True]
+  set (multTicker w) [interval := 1000]
   focusOn (multInput w)
 
 -- |Sets up the reactive behaviors for the widget
@@ -58,7 +70,9 @@ multNetwork :: MultWidget -> MomentIO ()
 multNetwork w = do
   bInput <- behaviorText (multInput w) ""
   eNext <- event0 (multInput w) command
-  bClear <- stepper  "" ("" <$ eNext)
+  bClear <- stepper "" ("" <$ eNext)
+  bTimeLeft <- bTimer 90
+  _ <- event0 (multTicker w) command
 
   let multProb = randMult (0, 99)
 
@@ -75,13 +89,14 @@ multNetwork w = do
   bScore <- accumB (0 :: Int) eScore
   bSteppedResult <- stepper "--" (maybe "--" show <$> (bResult <@ eNext))
 
-  sink (multPrompt w) [text :== bPrompt]
+  sink (multInput w) [text :== bClear]
   sink (multOutput w) [text :==  bSteppedResult]
   sink (multPoints w) [text :== show <$> bScore]
-  sink (multInput w) [text :== bClear]
+  sink (multPrompt w) [text :== bPrompt]
+  sink (multTimer w) [text :== show <$> bTimeLeft]
 
-timer :: Int -> MomentIO (Behavior Int)
-timer t = do
+bTimer :: Int -> MomentIO (Behavior Int)
+bTimer t = do
   initialTime <- liftIO getCurrentTime
   currentTime <- fromPoll getCurrentTime
-  pure $ subtract t . round . flip diffUTCTime initialTime <$> currentTime
+  pure $ flip subtract t . round . flip diffUTCTime initialTime <$> currentTime
