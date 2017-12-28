@@ -21,17 +21,19 @@ data MultWidget = MultWidget
   , multInput  :: TextCtrl ()
   , multPoints :: StaticText ()
   , multTimer  :: StaticText ()
+  , multGauge  :: Gauge ()
   , multTicker :: Timer
   , multG0     :: StdGen
   }
 
 -- |Creates a new multiplication widget
 newMultWidget :: Frame () -> IO MultWidget
-newMultWidget = (>>= (\pane prompt input points wTimer ticker -> MultWidget pane
+newMultWidget = (>>= (\pane prompt input points wTimer gauge ticker -> MultWidget pane
                        <$> prompt
                        <*> input
                        <*> points
                        <*> wTimer
+                       <*> gauge
                        <*> ticker
                        <*> getStdGen)
                  <$> id
@@ -39,6 +41,7 @@ newMultWidget = (>>= (\pane prompt input points wTimer ticker -> MultWidget pane
                  <*> flip entry []
                  <*> flip staticText []
                  <*> flip staticText []
+                 <*> flip (`hgauge` 90) []
                  <*> flip timer [])
   . flip panel []
 
@@ -54,10 +57,12 @@ setupMultWidget w = do
                       ]
                     , [ widget (multTimer w)
                       ]
+                    , [ widget (multGauge w)]
                     ]]
 
   set (multInput w) [processEnter := True]
   set (multTicker w) [interval := 1000]
+  set (multGauge w) [selection := 90]
   focusOn (multInput w)
 
 -- |Sets up the reactive behaviors for the widget
@@ -67,7 +72,7 @@ multNetwork w = do
   eNext <- event0 (multInput w) command
   bClear <- stepper "" ("" <$ eNext)
   eTicker <- event0 (multTicker w) command
-  bTimeLeft <- accumB (90 :: Int) (subtract 1 <$ eTicker)
+  bTimeLeft <- accumB 90 ((\n -> if n > 0 then n - 1 else 0) <$ eTicker)
 
   let bInProgress = (> 0) <$> bTimeLeft
       multProb = randMult (0, 99)
@@ -83,10 +88,10 @@ multNetwork w = do
                       _         -> subtract 1)
         <$> bResult <@ eNext
   bScore <- accumB (0 :: Int) eScore
-  bSteppedResult <- stepper "--" (maybe "--" show <$> (bResult <@ eNext))
 
   sink (multInput w) [text :== bClear]
   sink (multInput w) [enabled :== bInProgress]
   sink (multPoints w) [text :== show <$> bScore]
   sink (multPrompt w) [text :== bPrompt]
   sink (multTimer w) [text :== show <$> bTimeLeft]
+  sink (multGauge w) [selection :== bTimeLeft]
