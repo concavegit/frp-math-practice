@@ -1,6 +1,6 @@
+* Mental Math
 [[file:sample.png]]
 
-* Mental Math
 A repository for me to practice FRP and mental math.
 At the moment only multiplication is implemented.
 
