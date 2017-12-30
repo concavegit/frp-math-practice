@@ -85,10 +85,9 @@ multNetwork w = do
   let eResetTimer = const 90 <$ eResetClicked
       eCountTimer = (\n -> if n > 0 then n - 1 else 0) <$ eTicker
       eResetPoints = const 0 <$ eResetClicked
-      eResetClear = "" <$ eResetClicked
       eClear = "" <$ eNext
 
-  bClear <- stepper "" $ unionWith const eClear eResetClear
+  bClear <- stepper "" eClear
 
   bTimeLeft <- accumB 90 $ unionWith const eCountTimer eResetTimer
 
